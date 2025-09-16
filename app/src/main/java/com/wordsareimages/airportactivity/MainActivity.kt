@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -44,6 +42,11 @@ import java.time.ZonedDateTime
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import com.wordsareimages.airportactivity.models.FlightCacheEntry
+import com.wordsareimages.airportactivity.ui.theme.ArrivalRow
+import com.wordsareimages.airportactivity.ui.theme.DepartureRow
+import com.wordsareimages.airportactivity.ui.theme.TextAction
+import com.wordsareimages.airportactivity.ui.theme.TextWait
+import com.wordsareimages.airportactivity.ui.theme.WaitRow
 import java.time.ZoneId
 
 
@@ -163,7 +166,6 @@ fun AirportActivityApp() {
 
     val scope = rememberCoroutineScope()
 
-
     Column(modifier = Modifier.fillMaxWidth()) {
 
         Spacer(modifier = Modifier.height(30.dp)) // space between dropdowns
@@ -259,7 +261,7 @@ fun AirportActivityApp() {
 
                     rows.add(
                         listOf(
-                            flight.operation,
+                            label,
                             formattedLocalTime,
                             flight.ident,
                             flight.aircraftType,
@@ -286,9 +288,9 @@ fun AirportActivityApp() {
 
                 items(rows) { row ->
                     val bColor = when {
-                        row[0] == "Arr" || row[0] == "arrival" -> Color(0xFF7EE5CE) // Green
-                        row[0] == "Dep" || row[0] == "departure" -> Color(0xFF8AC1EA) // Red
-                        row[4].isNotEmpty() -> Color(0xFF163450) // Blue for "until next"
+                        row[0] == "Arr" || row[0] == "arrival" -> ArrivalRow
+                        row[0] == "Dep" || row[0] == "departure" -> DepartureRow
+                        row[4].isNotEmpty() -> WaitRow // Blue for "until next"
                         else -> Color.Transparent
                     }
 
@@ -298,9 +300,9 @@ fun AirportActivityApp() {
                         .padding(vertical = 4.dp)) {
 
                         val tColor = when {
-                            row[0] == "Arr" || row[0] == "arrival" -> Color(0xFF000000) // Green
-                            row[0] == "Dep" || row[0] == "departure" -> Color(0xFF000000) // Red
-                            row[4].isNotEmpty() -> Color(0xFFB6B4B4) // Blue for "until next"
+                            row[0] == "Arr" || row[0] == "arrival" -> TextAction // Green
+                            row[0] == "Dep" || row[0] == "departure" -> TextAction // Red
+                            row[4].isNotEmpty() -> TextWait // Blue for "until next"
                             else -> Color.Unspecified
                         }
 
