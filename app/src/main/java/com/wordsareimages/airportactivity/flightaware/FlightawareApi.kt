@@ -1,28 +1,35 @@
-package com.example.airportactivity.flightaware
+package com.wordsareimages.airportactivity.flightaware
 
-import com.example.airportactivity.models.FlightInfo
+import com.wordsareimages.airportactivity.models.FlightInfo
+import com.wordsareimages.airportactivity.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
-import java.time.ZonedDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.time.Instant
+import android.util.Log;
+import okhttp3.HttpUrl.Companion.toHttpUrl
 
 object FlightawareApi {
     private val client = OkHttpClient()
 
-    private const val API_KEY = BuildConfig.MY_API_KEY
+    private const val API_BASE = "https://aeroapi.flightaware.com/aeroapi"
 
-    private const val BASE_URL = "https://aeroapi.flightaware.com/aeroapi/airports/#AIRPORT#/flights"
+    private const val SCHEME = "https"
+    private const val HOST = "aeroapi.flightaware.com"
+    private const val BASE_PATH = "aeroapi/airports"
 
     suspend fun getApiData(airportCode: String, type: String): List<FlightInfo> {
         return when (type.lowercase()) {
             "arrivals" -> getFlightData(airportCode, "arrivals", 10)
             "departures" -> getFlightData(airportCode, "departures", 10)
             "all" -> {
-                val arrivals = getFlightData(airportCode, "arrivals")
-                val departures = getFlightData(airportCode, "departures")
+                val arrivals = getFlightData(airportCode, "arrivals", 10)
+                val departures = getFlightData(airportCode, "departures", 10)
                 arrivals + departures
             }
 
@@ -33,7 +40,7 @@ object FlightawareApi {
     suspend fun getFlightData(
         airportCode: String,
         type: String,
-        maxPages: Int = 10
+        maxPages: Int = 1
     ): List<FlightInfo> = withContext(Dispatchers.IO) {
 
         val typePath = when (type.lowercase()) {
@@ -42,29 +49,43 @@ object FlightawareApi {
             else -> throw IllegalArgumentException("Invalid type: $type")
         }
 
-        val label = if (type.lowercase() == "arrivals") "Arr" else "Dep"
+        Log.d("getFlightData", "Fetching $typePath")
+
         val allFlights = mutableListOf<FlightInfo>()
         var cursor: String? = null
         var pagesFetched = 0
-        val endDate = ZonedDateTime.now().plusDays(2)
-        val endDateFormatted = DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(endDate)
+        val startDate = Instant.now()
+        val endDate = startDate.plusSeconds(3600 * 24) // 1 day
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+            .withZone(ZoneOffset.UTC)
+        val startDateFormatted = formatter.format(startDate)
+        val endDateFormatted = formatter.format(endDate)
 
-        val basePath = BASE_URL.replace("#AIRPORT#", airportCode) + "/$typePath"
-
+        var url: HttpUrl? = null
         while (pagesFetched < maxPages) {
-            val urlBuilder = StringBuilder(basePath)
-            urlBuilder.append("?end=$endDateFormatted&max_pages=1") // 1 page per request
 
-            if (cursor != null) {
-                urlBuilder.append("&cursor=$cursor")
+            if (url == null) {
+                val urlBuilder = HttpUrl.Builder()
+                    .scheme(SCHEME)
+                    .host(HOST)
+                    .addPathSegments(BASE_PATH)
+                    .addPathSegment(airportCode)
+                    .addPathSegment("flights")
+                    .addPathSegment(typePath)
+
+                urlBuilder.addQueryParameter("start", startDateFormatted)
+                    .addQueryParameter("end", endDateFormatted)
+                    .addQueryParameter("max_pages", "1") // 1 page per request
+
+                url = urlBuilder.build()
             }
 
+            Log.d("apiCall", "URL: $url")
             val request = Request.Builder()
-                .url(urlBuilder.toString())
-                .addHeader("x-apikey", API_KEY)
+                .url(url)
+                .addHeader("x-apikey", BuildConfig.FLIGHTAWARE_API_KEY)
                 .build()
 
-            var nextCursor: String? = null
             var shouldStop = false
 
             client.newCall(request).execute().use { response ->
@@ -82,21 +103,24 @@ object FlightawareApi {
                 }
 
                 for (i in 0 until flightsArray.length()) {
-                    // parse each flight and add to allFlights
+                    val flightJson = flightsArray.getJSONObject(i)
+                    val flightInfo = FlightInfo.fromJson(flightJson, type)
+                    allFlights.add(flightInfo)
                 }
 
                 val links = json.optJSONObject("links")
-                nextCursor = links?.optString("next")?.takeIf { it.isNotBlank() }
+                val newPath = links?.optString("next")
 
-                if (nextCursor == null) {
+                if (newPath == null) {
                     shouldStop = true
+                } else {
+                    url = "$API_BASE$newPath".toHttpUrl()
                 }
             }
 
             // ✅ Now we can safely break or continue here
             if (shouldStop) break
 
-            cursor = nextCursor
             pagesFetched++
         }
 

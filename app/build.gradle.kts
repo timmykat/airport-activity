@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,12 +7,24 @@ plugins {
     alias(libs.plugins.kotlinx.serialization)
 }
 
+val secretsPropertiesFile = rootProject.file("secrets.properties")
+val secrets = Properties()
+
+if (secretsPropertiesFile.exists()) {
+    secrets.load(secretsPropertiesFile.inputStream())
+} else {
+    throw GradleException("Missing secrets.properties file in project root")
+}
+
+val flightawareApiKey = secrets.getProperty("FLIGHTAWARE_API_KEY")
+    ?: throw GradleException("FLIGHTAWARE_API_KEY not found in secrets.properties")
+
 android {
-    namespace = "com.example.airportactivity"
+    namespace = "com.wordsareimages.airportactivity"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.airportactivity"
+        applicationId = "com.wordsareimages.airportactivity"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
@@ -18,8 +32,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        val apiKey = System.getenv("FLIGHTAWARE_API_KEY") ?: null
-        buildConfigField("String", "FLIGHTAWARE_API_KEY", "\"$apiKey\"")
+        buildConfigField("String", "FLIGHTAWARE_API_KEY", "\"$flightawareApiKey\"")
 
     }
 
@@ -44,6 +57,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

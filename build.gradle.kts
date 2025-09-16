@@ -5,6 +5,14 @@ plugins {
     alias(libs.plugins.kotlin.compose) apply false
 }
 
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 buildscript {
     repositories {
         google()

@@ -1,4 +1,4 @@
-package com.example.airportactivity.ui.theme
+package com.wordsareimages.airportactivity.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

@@ -1,4 +1,4 @@
-package com.example.airportactivity
+package com.wordsareimages.airportactivity
 
 import org.junit.Test
 

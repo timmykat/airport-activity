@@ -1,4 +1,4 @@
-package com.example.airportactivity.models
+package com.wordsareimages.airportactivity.models
 
 data class PagedFlightResult(
     val flights: List<FlightInfo>,
