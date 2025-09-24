@@ -41,7 +41,6 @@ import kotlinx.coroutines.launch
 import java.time.ZonedDateTime
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import com.wordsareimages.airportactivity.models.FlightCacheEntry
 import com.wordsareimages.airportactivity.ui.theme.ArrivalRow
 import com.wordsareimages.airportactivity.ui.theme.DepartureRow
 import com.wordsareimages.airportactivity.ui.theme.TextAction
@@ -54,9 +53,15 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val app = application as AirportFlightActivityApp
+        val factory = FlightViewModelFactory(app.repository)
+
         setContent {
             AirportActivityTheme {
-                AirportActivityApp()
+                // Provide the ViewModel to Compose
+                val viewModel: FlightViewModel = viewModel(factory = factory)
+                AirportActivityApp(viewModel)
             }
         }
     }
@@ -162,7 +167,6 @@ fun AirportActivityApp() {
     var dayMenuExpanded by remember { mutableStateOf(false) }
     var flights by remember { mutableStateOf<List<FlightInfo>>(emptyList()) }
     var error by remember { mutableStateOf<String?>(null) }
-    val flightCache = remember { mutableStateOf(mutableMapOf<String, FlightCacheEntry>()) }
 
     val scope = rememberCoroutineScope()
 

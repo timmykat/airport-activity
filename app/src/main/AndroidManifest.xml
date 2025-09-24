@@ -9,6 +9,7 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_airportactivity"
         android:label="@string/app_name"
+        android:name=".AirportFlightActivityApp"
         android:roundIcon="@mipmap/ic_airportactivity_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AirportActivity">

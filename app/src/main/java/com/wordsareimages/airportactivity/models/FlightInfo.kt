@@ -1,7 +1,10 @@
 package com.wordsareimages.airportactivity.models
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import java.time.ZonedDateTime
 
+@Entity(tableName = "flights")
 data class FlightInfo(
     val ident: String,
     val aircraftType: String,
