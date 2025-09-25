@@ -1,5 +1,6 @@
 package com.wordsareimages.airportactivity.database
 
+import FlightDao
 import com.wordsareimages.airportactivity.models.FlightInfo
 import java.time.ZonedDateTime
 

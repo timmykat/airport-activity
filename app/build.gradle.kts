@@ -79,6 +79,7 @@ dependencies {
     implementation(libs.androidx.material3)
 
     // ✅ External libraries (quoted properly)
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 

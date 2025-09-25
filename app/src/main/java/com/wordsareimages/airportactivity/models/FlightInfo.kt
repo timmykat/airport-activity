@@ -6,7 +6,7 @@ import java.time.ZonedDateTime
 
 @Entity(tableName = "flights")
 data class FlightInfo(
-    val ident: String,
+    @PrimaryKey val ident: String,
     val aircraftType: String,
     val estimatedOn: String,
     val estimatedOff: String,

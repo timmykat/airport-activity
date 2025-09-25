@@ -1,15 +1,20 @@
 package com.wordsareimages.airportactivity.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,6 +26,11 @@ import androidx.compose.ui.unit.dp
 import com.wordsareimages.airportactivity.TwoDropdownsInline
 import com.wordsareimages.airportactivity.database.FlightViewModel
 import com.wordsareimages.airportactivity.flightaware.FlightawareApi
+import com.wordsareimages.airportactivity.ui.theme.ArrivalRow
+import com.wordsareimages.airportactivity.ui.theme.DepartureRow
+import com.wordsareimages.airportactivity.ui.theme.TextAction
+import com.wordsareimages.airportactivity.ui.theme.TextWait
+import com.wordsareimages.airportactivity.ui.theme.WaitRow
 import kotlinx.coroutines.launch
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -41,16 +51,15 @@ fun AirportActivityApp(viewModel: FlightViewModel) {
 
     val scope = rememberCoroutineScope()
 
-    Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .statusBarsPadding() // <-- adds padding equal to the status bar height
+        .padding(horizontal = 16.dp)) {
 
         // Airport & Day dropdowns
         TwoDropdownsInline(
             airports = airports,
-            days = days,
-            selectedAirport = selectedAirport,
-            onAirportSelected = { selectedAirport = it },
-            selectedDay = selectedDay,
-            onDaySelected = { selectedDay = it },
+            days = days
         )
 
         Spacer(modifier = Modifier.height(16.dp))
